@@ -1,0 +1,52 @@
+public class coursePath {
+    
+    public static List<String> findInternalCourse(String source, Map<String, List<String>> coursesMap, List<String> curPath) {
+        List<String> res = new ArrayList<>();
+        if(!coursesMap.containsKey(source) || coursesMap.get(source).size() == 0) {
+            //System.out.print(curPath);
+            String mid = curPath.size() % 2 == 0? curPath.get(curPath.size()/2 -1) : curPath.get(curPath.size()/2);
+            res.add(mid);
+            return res;
+        }
+        for(String child : coursesMap.get(source)) {
+            curPath.add(child);
+            res.addAll(findInternalCourse(child, coursesMap, curPath));
+            curPath.remove(child);
+        }
+        
+        return res;
+    }
+    
+    public static Map<String, List<String>> buildGraph(List<List<String>> courses, Map<String, Integer> indegree) {
+        Map<String, List<String>> res = new HashMap<>();
+        for(List<String> coursePair : courses) {
+            res.putIfAbsent(coursePair.get(0), new ArrayList<String>());
+            res.get(coursePair.get(0)).add(coursePair.get(1));
+            indegree.putIfAbsent(coursePair.get(0), 0);
+            indegree.putIfAbsent(coursePair.get(1), 0);
+            indegree.put(coursePair.get(1), indegree.get(coursePair.get(1))+1);
+        }
+        return res;
+    }
+    
+    public static void main(String[] args) {
+        List<List<String>> courses = new ArrayList<List<String>>();
+        courses.add(List.of("science", "art"));
+        courses.add(List.of("art", "Chinese"));
+        courses.add(List.of("Chinese", "Physics"));
+        courses.add(List.of("Math", "Physics"));
+        courses.add(List.of("Math", "English"));
+        courses.add(List.of("Physics", "Chemistry"));
+        courses.add(List.of("Chemistry", "Python"));
+        Map<String, Integer> indegree = new HashMap<String, Integer>();
+
+        Map<String, List<String>> graph = buildGraph(courses, indegree);
+        List<String> res = new ArrayList<>();
+        for(String course : indegree.keySet()) {
+            if(indegree.get(course) == 0) {
+                res.addAll(findInternalCourse(course, graph, new ArrayList<>(List.of(course))));
+            }
+        }
+        System.out.print(res);
+    }
+}
